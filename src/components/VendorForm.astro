@@ -1,0 +1,88 @@
+---
+// src/components/VendorForm.astro
+// Unified component: render registration or login form based on `mode` prop.
+const { mode = 'register' } = Astro.props;
+---
+<section class="max-w-lg mx-auto p-6 bg-white rounded-lg shadow">
+  {mode === 'register' ? (
+    <>
+      <h2 class="text-2xl font-semibold mb-4">Register as a Vendor</h2>
+      <form id="vendorForm" class="space-y-4">
+        <div>
+          <label for="name" class="block font-medium">Name</label>
+          <input type="text" name="name" id="name" required class="w-full mt-1 p-2 border rounded" />
+        </div>
+        <div>
+          <label for="email" class="block font-medium">Email</label>
+          <input type="email" name="email" id="email" required class="w-full mt-1 p-2 border rounded" />
+        </div>
+        <div>
+          <label for="password" class="block font-medium">Password</label>
+          <input type="password" name="password" id="password" required class="w-full mt-1 p-2 border rounded" />
+        </div>
+        <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          {mode === 'register' ? 'Register' : 'Login'}
+        </button>
+      </form>
+    </>
+  ) : (
+    <>
+      <h2 class="text-2xl font-semibold mb-4">Vendor Login</h2>
+      <form id="vendorForm" class="space-y-4">
+        <div>
+          <label for="email" class="block font-medium">Email</label>
+          <input type="email" name="email" id="email" required class="w-full mt-1 p-2 border rounded" />
+        </div>
+        <div>
+          <label for="password" class="block font-medium">Password</label>
+          <input type="password" name="password" id="password" required class="w-full mt-1 p-2 border rounded" />
+        </div>
+        <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          {mode === 'register' ? 'Register' : 'Login'}
+        </button>
+      </form>
+    </>
+  )}
+
+  <p id="vendorMsg" class="mt-4 text-center text-sm"></p>
+</section>
+
+<script is:inline type="module">
+  // Embed the `mode` prop as a JS constant
+  const mode = /** @type {string} */ (import.meta.env.MODE === undefined ? 'production' : 'development');
+  // Actually use the Astro prop value injected at build time
+  const VENDOR_MODE = /** @type {string} */ ('" + mode + "');
+
+  const form = document.getElementById('vendorForm');
+  const msg = document.getElementById('vendorMsg');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+    const data = Object.fromEntries(new FormData(form).entries());
+    const endpoint = VENDOR_MODE === 'register' ? '/api/auth/register' : '/api/auth/login';
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        msg.textContent = VENDOR_MODE === 'register'
+          ? 'Registration successful! Please log in.'
+          : 'Login successful! Redirecting...';
+        if (VENDOR_MODE === 'login') {
+          const { token } = await res.json();
+          document.cookie = `token=${token}; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=strict`;
+          window.location.href = '/vendor-portal';
+        } else {
+          form.reset();
+        }
+      } else {
+        const text = await res.text();
+        msg.textContent = `Error: ${text}`;
+      }
+    } catch (err) {
+      msg.textContent = 'Server error. Please try again later.';
+    }
+  });
+</script>

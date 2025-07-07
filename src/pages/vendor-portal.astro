@@ -1,0 +1,74 @@
+---
+import DefaultLayout from '../layouts/DefaultLayout.astro';
+import { requireAuth } from '../lib/auth';
+import { db } from '../db/client';
+import { listings, sales, payouts } from '../db/schema';
+
+// Authenticate vendor and get their ID
+const auth = await requireAuth(Astro);
+if (auth instanceof Response) return auth;
+const vendorId = auth;
+
+// Load data at build time
+const inventory = await db.select().from(listings).where(listings.vendorId.eq(vendorId));
+const soldItems = await db.select().from(sales).where(sales.vendorId.eq(vendorId));
+const totalRevenue = soldItems.reduce((sum, s) => sum + s.amount, 0);
+const pendingPayouts = await db.select().from(payouts).where(payouts.vendorId.eq(vendorId)).where(payouts.status.eq('pending'));
+---
+<DefaultLayout title="Vendor Dashboard - Stencil">
+  <!-- Stats Cards -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="p-4 bg-white rounded shadow">
+      <h3 class="text-sm font-medium text-gray-500">Inventory</h3>
+      <p class="text-2xl font-bold">{inventory.length}</p>
+    </div>
+    <div class="p-4 bg-white rounded shadow">
+      <h3 class="text-sm font-medium text-gray-500">Items Sold</h3>
+      <p class="text-2xl font-bold">{soldItems.length}</p>
+    </div>
+    <div class="p-4 bg-white rounded shadow">
+      <h3 class="text-sm font-medium text-gray-500">Total Revenue</h3>
+      <p class="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
+    </div>
+    <div class="p-4 bg-white rounded shadow">
+      <h3 class="text-sm font-medium text-gray-500">Pending Payouts</h3>
+      <p class="text-2xl font-bold">{pendingPayouts.length}</p>
+    </div>
+  </section>
+
+  <!-- Inventory Table & Actions -->
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold">Your Inventory</h2>
+      <a href="/add-listing" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add New Listing</a>
+    </div>
+    <div class="overflow-x-auto bg-white rounded shadow">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {inventory.map((item) => (
+            <tr key={item.id}>
+              <td class="px-6 py-4 whitespace-nowrap">{item.name}</td>
+              <td class="px-6 py-4 whitespace-nowrap">${item.price.toFixed(2)}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{item.status}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                <a href={`/edit-listing/${item.id}`} class="text-blue-600 hover:underline">Edit</a>
+                <button onClick={async () => {
+                  await fetch(`/api/listings/${item.id}`, { method: 'DELETE' });
+                  location.reload();
+                }} class="text-red-600 hover:underline">Remove</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</DefaultLayout>
