@@ -13,15 +13,14 @@ export interface Props {
 const { product } = Astro.props;
 ---
 <div class="group relative border-2 border-brand-text rounded-lg overflow-hidden bg-white transition-shadow duration-300 ease-in-out hover:shadow-[8px_8px_0_0_#00CED1]">
-  <a href={`/product/${product.id}`}>
-    <img src={product.imageUrl} alt={product.name} class="w-full h-64 object-cover">
-    <div class="p-4">
-      <h3 class="text-lg font-bold font-heading">{product.name}</h3>
-      <p class="text-sm text-gray-600 mb-2">by {product.vendor}</p>
-      <p class="text-xl font-extrabold text-brand-text">${product.price.toFixed(2)}</p>
-    </div>
-    <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-      <span class="text-white text-lg font-bold">View Product</span>
-    </div>
+  <a href={`/product/${product.id}`} class="block">
+    <img src={product.imageUrl} alt={product.name} class="w-full aspect-square object-cover">
   </a>
+  <div class="p-4">
+    <a href={`/product/${product.id}`} class="block">
+      <h3 class="text-lg font-bold font-heading">{product.name}</h3>
+    </a>
+    <p class="text-sm text-gray-600 mb-2">by <a href={`/vendor-portal?name=${product.vendor}`} class="hover:underline text-brand-text font-semibold">{product.vendor}</a></p>
+    <p class="text-xl font-extrabold text-brand-text">${product.price.toFixed(2)}</p>
+  </div>
 </div>

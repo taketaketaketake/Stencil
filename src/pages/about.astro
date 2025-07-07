@@ -1,0 +1,37 @@
+---
+import DefaultLayout from '../layouts/DefaultLayout.astro';
+import AboutHero from '../components/AboutHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import TeamSection from '../components/TeamSection.astro';
+import TestimonialSection from '../components/TestimonialSection.astro';
+import MapEmbed from '../components/MapEmbed.astro';
+import ContactForm from '../components/ContactForm.astro';
+---
+
+<DefaultLayout title="About Us - Stencil" description="Learn more about our mission and team.">
+  <AboutHero />
+
+  <section id="our-team" class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <TeamSection />
+    </div>
+  </section>
+
+  <section class="py-16 bg-light">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <TestimonialSection />
+    </div>
+  </section>
+
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <MapEmbed />
+    </div>
+  </section>
+
+  <section class="py-16 bg-light">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <ContactForm />
+    </div>
+  </section>
+</DefaultLayout>

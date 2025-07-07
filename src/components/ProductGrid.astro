@@ -2,19 +2,22 @@
 // src/components/ProductGrid.astro
 import ProductCard from './ProductCard.astro';
 
-// In a real app, this data would come from an API or database
-const featuredProducts = [
-  { id: 1, name: 'Surreal Collage Art', price: 45.00, imageUrl: 'https://source.unsplash.com/random/400x400?art,surreal', vendor: 'ArtfulDodger' },
-  { id: 2, name: 'Hand-Printed Tote Bag', price: 22.50, imageUrl: 'https://source.unsplash.com/random/400x400?tote,bag', vendor: 'CraftyCo' },
-  { id: 3, name: 'Ceramic Mug Set', price: 38.00, imageUrl: 'https://source.unsplash.com/random/400x400?mug,ceramic', vendor: 'ClayCreations' },
-  { id: 4, name: 'Vintage Band T-Shirt', price: 30.00, imageUrl: 'https://source.unsplash.com/random/400x400?vintage,shirt', vendor: 'RetroThreads' },
-];
+export interface Props {
+  products: Array<{ // Define a more specific type if you have one
+    id: number;
+    name: string;
+    price: number;
+    imageUrl: string;
+    vendor: string;
+  }>;
+}
+
+const { products } = Astro.props;
 ---
 <section class="py-16 bg-light">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h2 class="text-4xl font-extrabold font-heading text-center mb-12">Featured Products</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-      {featuredProducts.map(product => (
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+      {products.map(product => (
         <ProductCard product={product} />
       ))}
     </div>

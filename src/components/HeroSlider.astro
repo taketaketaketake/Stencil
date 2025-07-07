@@ -1,0 +1,109 @@
+---
+// src/components/HeroSlider.astro
+---
+<section class="relative w-full overflow-hidden">
+  <div id="slides-container" class="flex transition-transform duration-500 ease-in-out">
+    <!-- Slide 1 -->
+    <div class="w-full flex-shrink-0 bg-brand-bg py-20 text-center">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-6xl md:text-8xl font-extrabold font-heading tracking-tighter mb-4">
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-magenta to-brand-orange">
+            Discover Unique Creations.
+          </span>
+        </h1>
+        <p class="text-xl md:text-2xl text-brand-text max-w-2xl mx-auto mb-8">
+          Explore a curated marketplace of handcrafted goods from independent artists and makers.
+        </p>
+        <a 
+          href="/shop" 
+          class="inline-block bg-gradient-to-r from-brand-teal to-brand-magenta text-white font-bold text-lg rounded-lg px-8 py-4 transition-transform duration-300 ease-in-out hover:scale-105 shadow-lg"
+        >
+          Shop Now
+        </a>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="w-full flex-shrink-0 bg-brand-text py-20 text-center text-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-6xl md:text-8xl font-extrabold font-heading tracking-tighter mb-4">
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-orange to-brand-teal">
+            Sell Your Art.
+          </span>
+        </h1>
+        <p class="text-xl md:text-2xl max-w-2xl mx-auto mb-8">
+          Join our community of creators and turn your passion into a thriving business.
+        </p>
+        <a 
+          href="/sell" 
+          class="inline-block bg-gradient-to-r from-brand-magenta to-brand-orange text-white font-bold text-lg rounded-lg px-8 py-4 transition-transform duration-300 ease-in-out hover:scale-105 shadow-lg"
+        >
+          Become a Seller
+        </a>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="w-full flex-shrink-0 bg-brand-magenta py-20 text-center text-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-6xl md:text-8xl font-extrabold font-heading tracking-tighter mb-4">
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-teal to-brand-orange">
+            Support Independent.
+          </span>
+        </h1>
+        <p class="text-xl md:text-2xl max-w-2xl mx-auto mb-8">
+          Every purchase directly supports small businesses and unique craftsmanship.
+        </p>
+        <a 
+          href="/about" 
+          class="inline-block bg-gradient-to-r from-brand-orange to-brand-teal text-white font-bold text-lg rounded-lg px-8 py-4 transition-transform duration-300 ease-in-out hover:scale-105 shadow-lg"
+        >
+          Learn More
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination Dots -->
+  <div id="pagination-dots" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3">
+    <button class="w-3 h-3 rounded-full bg-gray-400 transition-colors duration-300 dot active" data-slide="0"></button>
+    <button class="w-3 h-3 rounded-full bg-gray-400 transition-colors duration-300 dot" data-slide="1"></button>
+    <button class="w-3 h-3 rounded-full bg-gray-400 transition-colors duration-300 dot" data-slide="2"></button>
+  </div>
+</section>
+
+<script is:inline>
+  const slidesContainer = document.getElementById('slides-container');
+  const dotsContainer = document.getElementById('pagination-dots');
+  const dots = dotsContainer.querySelectorAll('.dot');
+  let currentSlide = 0;
+  const totalSlides = slidesContainer.children.length;
+
+  const updateSlider = () => {
+    slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+    dots.forEach((dot, index) => {
+      if (index === currentSlide) {
+        dot.classList.add('bg-brand-magenta');
+        dot.classList.remove('bg-gray-400');
+      } else {
+        dot.classList.remove('bg-brand-magenta');
+        dot.classList.add('bg-gray-400');
+      }
+    });
+  };
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      currentSlide = parseInt(e.target.dataset.slide);
+      updateSlider();
+    });
+  });
+
+  // Auto-advance slides (optional)
+  setInterval(() => {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    updateSlider();
+  }, 5000); // Change slide every 5 seconds
+
+  updateSlider(); // Initial update
+</script>

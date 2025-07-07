@@ -1,21 +1,34 @@
 ---
 import DefaultLayout from '../layouts/DefaultLayout.astro';
-import HeroSection from '../components/HeroSection.astro';
+import HeroSlider from '../components/HeroSlider.astro';
 import CategoryGrid from '../components/CategoryGrid.astro';
 import ProductGrid from '../components/ProductGrid.astro';
 import SellSteps from '../components/SellSteps.astro';
 import VendorCarousel from '../components/VendorCarousel.astro';
 import TestimonialSection from '../components/TestimonialSection.astro';
+import ValuePropositionSection from '../components/ValuePropositionSection.astro';
 
 const pageTitle = "Vibe Marketplace | Find Your Vibe";
 const pageDescription = "Vibe is a curated marketplace for unique, handcrafted goods from independent creators and artists.";
+
+const featuredProducts = [
+  { id: 1, name: 'Surreal Collage Art', price: 45.00, imageUrl: 'https://images.unsplash.com/photo-1579783902671-98d626cffc79?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'ArtfulDodger' },
+  { id: 2, name: 'Hand-Printed Tote Bag', price: 22.50, imageUrl: 'https://images.unsplash.com/photo-1588987025000-e0721126122b?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'CraftyCo' },
+  { id: 3, name: 'Ceramic Mug Set', price: 38.00, imageUrl: 'https://images.unsplash.com/photo-1578836522992-59151709729e?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'ClayCreations' },
+  { id: 4, name: 'Vintage Band T-Shirt', price: 30.00, imageUrl: 'https://images.unsplash.com/photo-1598032895397-b9472444bf93?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'RetroThreads' },
+  { id: 5, name: 'Abstract Canvas Print', price: 60.00, imageUrl: 'https://images.unsplash.com/photo-1579783902671-98d626cffc79?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'ModernArt' },
+  { id: 6, name: 'Knitted Scarf', price: 25.00, imageUrl: 'https://images.unsplash.com/photo-1523381294919-dd11e3542282?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'WarmWoven' },
+  { id: 7, name: 'Handmade Soap Set', price: 18.00, imageUrl: 'https://images.unsplash.com/photo-1596462502278-27ddabf58e04?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'ScentedCreations' },
+  { id: 8, name: 'Custom Pet Portrait', price: 85.00, imageUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', vendor: 'PetPaints' },
+];
 ---
 
 <DefaultLayout title={pageTitle} description={pageDescription}>
-  <HeroSection />
+  <HeroSlider />
+  <ProductGrid products={featuredProducts} />
+  <ValuePropositionSection />
   <CategoryGrid />
-  <ProductGrid />
-  <SellSteps />
+<SellSteps />
   <VendorCarousel />
   <TestimonialSection />
 </DefaultLayout>

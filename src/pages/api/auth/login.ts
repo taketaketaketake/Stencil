@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import bcrypt from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
+import { eq } from 'drizzle-orm';
 import { db } from '../../../db/client';
 import { vendors } from '../../../db/schema';
 
@@ -8,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 
 export const post: APIRoute = async ({ request }) => {
   const { email, password } = await request.json();
-  const user = await db.select().from(vendors).where(vendors.email.eq(email)).get();
+  const user = await db.select().from(vendors).where(eq(vendors.email, email)).get();
   if (!user) {
     return new Response('Invalid credentials', { status: 401 });
   }
