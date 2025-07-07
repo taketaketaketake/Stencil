@@ -1,0 +1,41 @@
+---
+// src/components/VendorFAQ.astro
+const faqs = [
+  {
+    question: 'What are the fees for selling on Vibe?',
+    answer: 'We charge a 5% transaction fee and a 3% + $0.25 payment processing fee. No listing fees!'
+  },
+  {
+    question: 'How do I get paid?',
+    answer: 'Payouts are sent directly to your connected bank account every Monday for the previous week\'s sales.'
+  },
+  {
+    question: 'Can I sell vintage items?',
+    answer: 'Absolutely! We love unique and vintage finds. Just make sure they are accurately described and photographed.'
+  },
+  {
+    question: 'What kind of support do you offer vendors?',
+    answer: 'We have a dedicated vendor support team available 24/7 to help you with any questions or issues.'
+  }
+];
+---
+<section class="py-20">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-4xl font-extrabold font-heading text-center mb-12">Vendor FAQ</h2>
+    <div class="space-y-4">
+      {faqs.map((faq, index) => (
+        <div class="border-2 border-brand-text rounded-lg" x-data=`{ open: ${index === 0} }`>
+          <button @click="open = !open" class="w-full flex items-center justify-between p-4 font-bold">
+            <span>{faq.question}</span>
+            <span x-text="open ? '-' : '+'" class="text-2xl"></span>
+          </button>
+          <div x-show="open" x-transition class="p-4 pt-0">
+            <p>{faq.answer}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script is:inline src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>

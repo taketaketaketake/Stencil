@@ -1,0 +1,20 @@
+---
+// src/components/TestimonialSection.astro
+import TestimonialCard from './TestimonialCard.astro';
+
+const testimonials = [
+  { quote: "I found the most amazing vintage jacket! The quality is incredible and the seller was so sweet.", author: "Jess K.", rating: 5 },
+  { quote: "Selling my art here has been a game-changer. The community is so supportive and I've connected with so many cool people.", author: "Marco R.", rating: 5 },
+  { quote: "A great platform for discovering unique pieces you won't find anywhere else. Highly recommend.", author: "Alex P.", rating: 4 },
+];
+---
+<section class="py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-4xl font-extrabold font-heading text-center mb-12">What Our Community Says</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {testimonials.map(testimonial => (
+        <TestimonialCard testimonial={testimonial} />
+      ))}
+    </div>
+  </div>
+</section>

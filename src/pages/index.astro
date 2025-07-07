@@ -2,49 +2,20 @@
 import DefaultLayout from '../layouts/DefaultLayout.astro';
 import HeroSection from '../components/HeroSection.astro';
 import CategoryGrid from '../components/CategoryGrid.astro';
+import ProductGrid from '../components/ProductGrid.astro';
+import SellSteps from '../components/SellSteps.astro';
 import VendorCarousel from '../components/VendorCarousel.astro';
-import TestimonialCard from '../components/TestimonialCard.astro';
+import TestimonialSection from '../components/TestimonialSection.astro';
 
-const pageTitle = "Home ‐ Stencil Marketplace";
-const pageDescription = "Placeholder description for Stencil Marketplace homepage.";
+const pageTitle = "Vibe Marketplace | Find Your Vibe";
+const pageDescription = "Vibe is a curated marketplace for unique, handcrafted goods from independent creators and artists.";
 ---
 
 <DefaultLayout title={pageTitle} description={pageDescription}>
-  <HeroSection
-    title="Where Marketplace Meets Community"
-    subtitle="Browse unique local finds or sell your items with ease."
-    backgroundUrl="/images/hero-placeholder.jpg"
-    ctaText1="Shop Now"
-    ctaLink1="/shop"
-    ctaText2="Become a Vendor"
-    ctaLink2="/sell"
-  />
-
-  <section class="mt-16">
-    <h2 class="text-3xl font-bold mb-6">Shop by Category</h2>
-    <CategoryGrid categories={[
-      { name: 'Furniture', link: '/shop?category=Furniture', image: '/images/furniture.jpg' },
-      { name: 'Electronics', link: '/shop?category=Electronics', image: '/images/electronics.jpg' },
-      { name: 'Apparel', link: '/shop?category=Apparel', image: '/images/apparel.jpg' },
-      { name: 'Home Décor', link: '/shop?category=Home+Décor', image: '/images/home-decor.jpg' },
-    ]} />
-  </section>
-
-  <section class="mt-16">
-    <h2 class="text-3xl font-bold mb-6">Meet Our Vendors</h2>
-    <VendorCarousel vendors={[
-      { name: 'Vendor A', description: 'Quality furniture & decor', image: '/images/vendor-a.jpg' },
-      { name: 'Vendor B', description: 'Vintage electronics specialist', image: '/images/vendor-b.jpg' },
-      { name: 'Vendor C', description: 'Unique apparel finds', image: '/images/vendor-c.jpg' },
-      { name: 'Vendor D', description: 'Handmade home accessories', image: '/images/vendor-d.jpg' },
-    ]} />
-  </section>
-
-  <section class="mt-16 mb-16">
-    <h2 class="text-3xl font-bold mb-6">What People Are Saying</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <TestimonialCard author="John from Detroit" quote="Amazing finds and great service!" />
-      <TestimonialCard author="Sarah the Seller" quote="Selling was easy and quick payouts." />
-    </div>
-  </section>
+  <HeroSection />
+  <CategoryGrid />
+  <ProductGrid />
+  <SellSteps />
+  <VendorCarousel />
+  <TestimonialSection />
 </DefaultLayout>

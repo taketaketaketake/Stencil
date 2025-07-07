@@ -1,0 +1,27 @@
+---
+// src/components/ProductCard.astro
+export interface Props {
+  product: {
+    id: number;
+    name: string;
+    price: number;
+    imageUrl: string;
+    vendor: string;
+  };
+}
+
+const { product } = Astro.props;
+---
+<div class="group relative border-2 border-brand-text rounded-lg overflow-hidden bg-white transition-shadow duration-300 ease-in-out hover:shadow-[8px_8px_0_0_#00CED1]">
+  <a href={`/product/${product.id}`}>
+    <img src={product.imageUrl} alt={product.name} class="w-full h-64 object-cover">
+    <div class="p-4">
+      <h3 class="text-lg font-bold font-heading">{product.name}</h3>
+      <p class="text-sm text-gray-600 mb-2">by {product.vendor}</p>
+      <p class="text-xl font-extrabold text-brand-text">${product.price.toFixed(2)}</p>
+    </div>
+    <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <span class="text-white text-lg font-bold">View Product</span>
+    </div>
+  </a>
+</div>

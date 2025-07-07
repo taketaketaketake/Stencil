@@ -1,14 +1,16 @@
 ---
+import { and, eq } from 'drizzle-orm';
 import DefaultLayout from '../../layouts/DefaultLayout.astro';
 import { requireAuth } from '../../lib/auth';
 import { db } from '../../db/client';
 import { listings } from '../../db/schema';
 
-// Authenticate vendor
-const vendorId = await requireAuth(Astro);
-// Fetch listing by ID
 const { id } = Astro.params;
-const item = await db.select().from(listings).where(listings.id.eq(id)).where(listings.vendorId.eq(vendorId)).get();
+const auth = await requireAuth(Astro);
+if (auth instanceof Response) return auth;
+const vendorId = auth;
+
+const item = await db.select().from(listings).where(and(eq(listings.id, Number(id)), eq(listings.vendorId, Number(vendorId)))).get();
 if (!item) {
   throw new Error('Listing not found or unauthorized');
 }

@@ -1,5 +1,6 @@
-import { Database } from 'sqlite3';
-import { drizzle } from 'drizzle-orm/sqlite';
+import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
 
-const sqlite = new Database('db.sqlite'); // or use process.env.DATABASE_URL
+const sqlite = new Database('db.sqlite');
 export const db = drizzle(sqlite);
+

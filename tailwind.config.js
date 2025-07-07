@@ -1,4 +1,6 @@
 // tailwind.config.js
+const defaultTheme = require('tailwindcss/defaultTheme');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -7,7 +9,19 @@ module.exports = {
     './src/components/**/*.astro'
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'brand-text': '#1E2A78',
+        'brand-bg': '#FDFDFD',
+        'brand-magenta': '#FF00FF',
+        'brand-orange': '#FFA500',
+        'brand-teal': '#00CED1',
+      },
+      fontFamily: {
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        heading: ['Poppins', ...defaultTheme.fontFamily.sans],
+      },
+    },
   },
   plugins: [],
 };

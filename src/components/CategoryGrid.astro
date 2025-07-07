@@ -1,0 +1,24 @@
+---
+// src/components/CategoryGrid.astro
+const categories = [
+  { name: 'Apparel', href: '/shop?category=apparel', color: 'bg-brand-magenta' },
+  { name: 'Accessories', href: '/shop?category=accessories', color: 'bg-brand-orange' },
+  { name: 'Home Goods', href: '/shop?category=home-goods', color: 'bg-brand-teal' },
+  { name: 'Art & Prints', href: '/shop?category=art', color: 'bg-brand-magenta' },
+];
+---
+<section class="py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-4xl font-extrabold font-heading text-center mb-12">Shop by Category</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {categories.map(category => (
+        <a 
+          href={category.href} 
+          class={`group block p-8 rounded-lg border-2 border-brand-text text-center transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[8px_8px_0_0_#1E2A78] ${category.color}`}
+        >
+          <h3 class="text-2xl font-bold font-heading text-white">{category.name}</h3>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
