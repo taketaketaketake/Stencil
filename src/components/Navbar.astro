@@ -26,15 +26,42 @@
         return parts[0] === name ? decodeURIComponent(parts[1]) : r;
       }, '');
     }
-  
-    const token = getCookie('token');
-    const isVendor = Boolean(token);
-  
-    // Show/hide links based on authentication
-    document.getElementById('vendorPortalLink').classList.toggle('hidden', !isVendor);
-    document.getElementById('logoutBtn').classList.toggle('hidden', !isVendor);
-    document.getElementById('loginLink').classList.toggle('hidden', isVendor);
-    document.getElementById('registerLink').classList.toggle('hidden', isVendor);
+
+    // Check if user is actually logged in by testing the token
+    async function checkAuth() {
+      const token = getCookie('token');
+      if (!token) {
+        return false;
+      }
+
+      try {
+        // Test token by making a request to vendor portal (which requires auth)
+        const response = await fetch('/vendor-portal/profile', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        // If we get 401/403, token is invalid
+        if (response.status === 401 || response.status === 403) {
+          // Clear invalid token
+          document.cookie = 'token=; Path=/; Max-Age=0; SameSite=strict';
+          return false;
+        }
+        
+        return response.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    // Initialize auth state
+    checkAuth().then(isVendor => {
+      // Show/hide links based on authentication
+      document.getElementById('vendorPortalLink').classList.toggle('hidden', !isVendor);
+      document.getElementById('logoutBtn').classList.toggle('hidden', !isVendor);
+      document.getElementById('loginLink').classList.toggle('hidden', isVendor);
+      document.getElementById('registerLink').classList.toggle('hidden', isVendor);
+    });
   
     // Logout handler
     document.getElementById('logoutBtn').addEventListener('click', () => {

@@ -1,19 +1,46 @@
 ---
 import { and, eq } from 'drizzle-orm';
 import DefaultLayout from '../../layouts/DefaultLayout.astro';
-import { requireAuth } from '../../lib/auth';
+import jwt from 'jsonwebtoken';
 import { db } from '../../db/client';
-import { listings } from '../../db/schema';
+import { listings, listingVariants } from '../../db/schema';
 
 const { id } = Astro.params;
-const auth = await requireAuth(Astro);
-if (auth instanceof Response) return auth;
-const vendorId = auth;
 
-const item = await db.select().from(listings).where(and(eq(listings.id, Number(id)), eq(listings.vendorId, Number(vendorId)))).get();
+// Check for auth token in cookies (like vendor-portal.astro does)
+const cookieHeader = Astro.request.headers.get('cookie') || '';
+const cookies: Record<string, string> = {};
+cookieHeader.split(';').forEach(cookie => {
+  const [name, ...rest] = cookie.trim().split('=');
+  if (name) {
+    cookies[name] = rest.join('=');
+  }
+});
+
+if (!cookies.token) {
+  return Astro.redirect('/login');
+}
+
+// Verify token and get vendor
+let vendorId;
+try {
+  const JWT_SECRET = process.env.JWT_SECRET!;
+  const payload = jwt.verify(cookies.token, JWT_SECRET) as { vendorId: string };
+  vendorId = parseInt(payload.vendorId, 10);
+} catch {
+  return Astro.redirect('/login');
+}
+
+// Get listing with its variants
+const item = await db.select().from(listings).where(and(eq(listings.id, Number(id)), eq(listings.vendorId, vendorId))).get();
 if (!item) {
   throw new Error('Listing not found or unauthorized');
 }
+
+// Get the first variant for display (since form expects single listing structure)
+const variants = await db.select().from(listingVariants).where(eq(listingVariants.listingId, Number(id))).all();
+const firstVariant = variants[0];
+const variantAttributes = firstVariant ? JSON.parse(firstVariant.attributes as string) : {};
 ---
 <DefaultLayout title="Edit Listing - Stencil">
   <section class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -29,13 +56,13 @@ if (!item) {
       </div>
       <div>
         <label for="price" class="block font-medium">Price ($)</label>
-        <input type="number" name="price" id="price" step="0.01" required value={item.price} class="w-full mt-1 p-2 border rounded" />
+        <input type="number" name="price" id="price" step="0.01" required value={firstVariant?.price || 0} class="w-full mt-1 p-2 border rounded" />
       </div>
       <div>
         <label for="status" class="block font-medium">Condition</label>
         <select name="status" id="status" class="w-full mt-1 p-2 border rounded">
-          <option value="new" selected={item.status === 'new'}>New</option>
-          <option value="used" selected={item.status === 'used'}>Used</option>
+          <option value="new" selected={variantAttributes?.condition === 'new'}>New</option>
+          <option value="used" selected={variantAttributes?.condition === 'used'}>Used</option>
         </select>
       </div>
       <button type="submit" class="w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Save Changes</button>
@@ -48,15 +75,39 @@ if (!item) {
     const form = document.getElementById('editForm');
     const deleteBtn = document.getElementById('deleteBtn');
     const msg = document.getElementById('editMessage');
+    
+    // Get listing ID from URL
+    const listingId = window.location.pathname.split('/').pop();
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); msg.textContent = '';
+      e.preventDefault(); 
+      msg.textContent = 'Updating listing...';
+      
       const data = Object.fromEntries(new FormData(form).entries());
+      
+      // Transform data to match new listing-variants structure
+      const listingData = {
+        name: data.name,
+        description: data.description,
+        category: data.category || '',
+        subCategory: data.subCategory || '',
+        tags: data.tags || '',
+        variants: [{
+          name: `${data.name} - Default`,
+          price: parseFloat(data.price),
+          stock: 1,
+          attributes: {
+            condition: data.status || 'new'
+          },
+          images: [] // Keep existing images for now
+        }]
+      };
+      
       try {
-        const res = await fetch(`/api/listings/${id}`, {
+        const res = await fetch(`/api/listings/${listingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify(listingData),
         });
         if (res.ok) {
           window.location.href = '/vendor-portal';
@@ -71,7 +122,7 @@ if (!item) {
     deleteBtn.addEventListener('click', async () => {
       if (!confirm('Are you sure you want to delete this listing?')) return;
       try {
-        const res = await fetch(`/api/listings/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/listings/${listingId}`, { method: 'DELETE' });
         if (res.ok) {
           window.location.href = '/vendor-portal';
         } else {

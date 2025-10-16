@@ -38,23 +38,59 @@ const vendorId = await requireAuth(Astro);
   </section>
 
   <script is:inline type="module">
-    import { uploadImage } from '../lib/cloudinary.js';
     const form = document.getElementById('listingForm');
     const msg = document.getElementById('formMessage');
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); msg.textContent = '';
+      e.preventDefault(); 
+      msg.textContent = 'Creating listing...';
+      
       const data = Object.fromEntries(new FormData(form).entries());
-      // Handle image upload
+      
+      // Handle image upload if file is selected
       if (form.image.files.length) {
         const file = form.image.files[0];
-        data.imageUrl = await uploadImage(file);
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          const uploadRes = await fetch('/vendor-portal/upload-image', {
+            method: 'POST',
+            body: formData,
+          });
+          if (uploadRes.ok) {
+            const { url } = await uploadRes.json();
+            data.imageUrl = url;
+          } else {
+            throw new Error('Image upload failed');
+          }
+        } catch (err) {
+          msg.textContent = 'Image upload failed. Please try again.';
+          return;
+        }
       }
-      data.vendorId = vendorId;
+      
+      // Transform data to match new listing-variants structure
+      const listingData = {
+        name: data.name,
+        description: data.description,
+        category: data.category || '',
+        subCategory: data.subCategory || '',
+        tags: data.tags || '',
+        variants: [{
+          name: `${data.name} - Default`,
+          price: parseFloat(data.price),
+          stock: 1,
+          attributes: {
+            condition: data.status || 'new'
+          },
+          images: data.imageUrl ? [data.imageUrl] : []
+        }]
+      };
+      
       try {
         const res = await fetch('/api/listings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify(listingData),
         });
         if (res.ok) {
           window.location.href = '/vendor-portal';
