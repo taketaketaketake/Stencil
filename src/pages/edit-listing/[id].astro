@@ -1,7 +1,9 @@
 ---
+export const prerender = false;
+
 import { and, eq } from 'drizzle-orm';
 import DefaultLayout from '../../layouts/DefaultLayout.astro';
-import jwt from 'jsonwebtoken';
+import { getVendorIdFromToken } from '../../utils/jwt';
 import { db } from '../../db/client';
 import { listings, listingVariants } from '../../db/schema';
 
@@ -24,9 +26,7 @@ if (!cookies.token) {
 // Verify token and get vendor
 let vendorId;
 try {
-  const JWT_SECRET = process.env.JWT_SECRET!;
-  const payload = jwt.verify(cookies.token, JWT_SECRET) as { vendorId: string };
-  vendorId = parseInt(payload.vendorId, 10);
+  vendorId = getVendorIdFromToken(cookies.token);
 } catch {
   return Astro.redirect('/login');
 }
@@ -41,6 +41,8 @@ if (!item) {
 const variants = await db.select().from(listingVariants).where(eq(listingVariants.listingId, Number(id))).all();
 const firstVariant = variants[0];
 const variantAttributes = firstVariant ? JSON.parse(firstVariant.attributes as string) : {};
+const currentImages = firstVariant?.images ? JSON.parse(firstVariant.images as string) : [];
+const currentImage = currentImages.length > 0 ? currentImages[0] : null;
 ---
 <DefaultLayout title="Edit Listing - Stencil">
   <section class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -54,9 +56,34 @@ const variantAttributes = firstVariant ? JSON.parse(firstVariant.attributes as s
         <label for="description" class="block font-medium">Description</label>
         <textarea name="description" id="description" rows="3" class="w-full mt-1 p-2 border rounded">{item.description}</textarea>
       </div>
-      <div>
-        <label for="price" class="block font-medium">Price ($)</label>
-        <input type="number" name="price" id="price" step="0.01" required value={firstVariant?.price || 0} class="w-full mt-1 p-2 border rounded" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="category" class="block font-medium">Category</label>
+          <select name="category" id="category" class="w-full mt-1 p-2 border rounded">
+            <option value="">Select Category</option>
+            <option value="clothing" selected={item.category === 'clothing'}>Clothing</option>
+            <option value="accessories" selected={item.category === 'accessories'}>Accessories</option>
+            <option value="art" selected={item.category === 'art'}>Art</option>
+            <option value="home-decor" selected={item.category === 'home-decor'}>Home Decor</option>
+            <option value="jewelry" selected={item.category === 'jewelry'}>Jewelry</option>
+            <option value="crafts" selected={item.category === 'crafts'}>Crafts</option>
+            <option value="other" selected={item.category === 'other'}>Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="subCategory" class="block font-medium">Subcategory</label>
+          <input type="text" name="subCategory" id="subCategory" placeholder="e.g., T-shirts, Paintings, etc." value={item.subCategory || ''} class="w-full mt-1 p-2 border rounded" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="price" class="block font-medium">Price ($)</label>
+          <input type="number" name="price" id="price" step="0.01" required value={firstVariant?.price || 0} class="w-full mt-1 p-2 border rounded" />
+        </div>
+        <div>
+          <label for="stock" class="block font-medium">Stock Quantity</label>
+          <input type="number" name="stock" id="stock" min="0" required value={firstVariant?.stock || 1} class="w-full mt-1 p-2 border rounded" />
+        </div>
       </div>
       <div>
         <label for="status" class="block font-medium">Condition</label>
@@ -64,6 +91,22 @@ const variantAttributes = firstVariant ? JSON.parse(firstVariant.attributes as s
           <option value="new" selected={variantAttributes?.condition === 'new'}>New</option>
           <option value="used" selected={variantAttributes?.condition === 'used'}>Used</option>
         </select>
+      </div>
+      <div>
+        <label class="block font-medium">Current Image</label>
+        {currentImage ? (
+          <div class="mt-2 relative inline-block">
+            <img src={currentImage} alt="Current listing image" class="w-32 h-32 object-cover rounded border" />
+            <button type="button" id="deleteImageBtn" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600">&times;</button>
+          </div>
+        ) : (
+          <p class="text-gray-500 text-sm mt-1">No image uploaded</p>
+        )}
+        <div class="mt-3">
+          <label for="newImage" class="block font-medium text-sm">Upload New Image</label>
+          <input type="file" name="newImage" id="newImage" accept="image/*" class="w-full mt-1" />
+          <p class="text-xs text-gray-500 mt-1">Upload a new image to replace the current one</p>
+        </div>
       </div>
       <button type="submit" class="w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Save Changes</button>
       <button type="button" id="deleteBtn" class="mt-2 w-full py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete Listing</button>
@@ -74,16 +117,56 @@ const variantAttributes = firstVariant ? JSON.parse(firstVariant.attributes as s
   <script is:inline type="module">
     const form = document.getElementById('editForm');
     const deleteBtn = document.getElementById('deleteBtn');
+    const deleteImageBtn = document.getElementById('deleteImageBtn');
+    const newImageInput = document.getElementById('newImage');
     const msg = document.getElementById('editMessage');
     
     // Get listing ID from URL
     const listingId = window.location.pathname.split('/').pop();
+    
+    // Track image state
+    let currentImageDeleted = false;
+    let newImageUrl = null;
+
+    // Delete current image handler
+    if (deleteImageBtn) {
+      deleteImageBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete the current image?')) {
+          currentImageDeleted = true;
+          deleteImageBtn.parentElement.style.display = 'none';
+          msg.textContent = 'Image will be deleted when you save changes.';
+        }
+      });
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); 
       msg.textContent = 'Updating listing...';
       
       const data = Object.fromEntries(new FormData(form).entries());
+      
+      // Handle new image upload if file is selected
+      if (newImageInput.files.length > 0) {
+        const file = newImageInput.files[0];
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          const uploadRes = await fetch('/vendor-portal/upload-image', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include', // Include cookies for authentication
+          });
+          if (uploadRes.ok) {
+            const { url } = await uploadRes.json();
+            newImageUrl = url;
+          } else {
+            throw new Error('Image upload failed');
+          }
+        } catch (err) {
+          msg.textContent = 'Image upload failed. Please try again.';
+          return;
+        }
+      }
       
       // Transform data to match new listing-variants structure
       const listingData = {
@@ -95,16 +178,27 @@ const variantAttributes = firstVariant ? JSON.parse(firstVariant.attributes as s
         variants: [{
           name: `${data.name} - Default`,
           price: parseFloat(data.price),
-          stock: 1,
+          stock: parseInt(data.stock) || 1,
           attributes: {
             condition: data.status || 'new'
           },
-          images: [] // Keep existing images for now
+          images: (() => {
+            // Handle image state: new upload, delete current, or keep existing
+            if (newImageUrl) {
+              return [newImageUrl]; // New image uploaded
+            } else if (currentImageDeleted) {
+              return []; // Current image deleted
+            } else {
+              // Keep existing image if any
+              const currentImg = document.querySelector('img[alt="Current listing image"]');
+              return currentImg ? [currentImg.src] : [];
+            }
+          })()
         }]
       };
       
       try {
-        const res = await fetch(`/api/listings/${listingId}`, {
+        const res = await fetch(`/vendor-portal/edit-listing/${listingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(listingData),
@@ -122,7 +216,7 @@ const variantAttributes = firstVariant ? JSON.parse(firstVariant.attributes as s
     deleteBtn.addEventListener('click', async () => {
       if (!confirm('Are you sure you want to delete this listing?')) return;
       try {
-        const res = await fetch(`/api/listings/${listingId}`, { method: 'DELETE' });
+        const res = await fetch(`/vendor-portal/delete-listing/${listingId}`, { method: 'DELETE' });
         if (res.ok) {
           window.location.href = '/vendor-portal';
         } else {

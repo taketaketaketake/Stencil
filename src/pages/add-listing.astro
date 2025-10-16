@@ -17,9 +17,34 @@ const vendorId = await requireAuth(Astro);
         <label for="description" class="block font-medium">Description</label>
         <textarea name="description" id="description" rows="3" class="w-full mt-1 p-2 border rounded"></textarea>
       </div>
-      <div>
-        <label for="price" class="block font-medium">Price ($)</label>
-        <input type="number" name="price" id="price" step="0.01" required class="w-full mt-1 p-2 border rounded" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="category" class="block font-medium">Category</label>
+          <select name="category" id="category" class="w-full mt-1 p-2 border rounded">
+            <option value="">Select Category</option>
+            <option value="clothing">Clothing</option>
+            <option value="accessories">Accessories</option>
+            <option value="art">Art</option>
+            <option value="home-decor">Home Decor</option>
+            <option value="jewelry">Jewelry</option>
+            <option value="crafts">Crafts</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="subCategory" class="block font-medium">Subcategory</label>
+          <input type="text" name="subCategory" id="subCategory" placeholder="e.g., T-shirts, Paintings, etc." class="w-full mt-1 p-2 border rounded" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="price" class="block font-medium">Price ($)</label>
+          <input type="number" name="price" id="price" step="0.01" required class="w-full mt-1 p-2 border rounded" />
+        </div>
+        <div>
+          <label for="stock" class="block font-medium">Stock Quantity</label>
+          <input type="number" name="stock" id="stock" min="0" value="1" required class="w-full mt-1 p-2 border rounded" />
+        </div>
       </div>
       <div>
         <label for="status" class="block font-medium">Condition</label>
@@ -78,7 +103,7 @@ const vendorId = await requireAuth(Astro);
         variants: [{
           name: `${data.name} - Default`,
           price: parseFloat(data.price),
-          stock: 1,
+          stock: parseInt(data.stock) || 1,
           attributes: {
             condition: data.status || 'new'
           },
@@ -91,6 +116,7 @@ const vendorId = await requireAuth(Astro);
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(listingData),
+          credentials: 'include', // Include cookies for authentication
         });
         if (res.ok) {
           window.location.href = '/vendor-portal';

@@ -4,6 +4,8 @@ import { vendors } from '../../db/schema';
 import { requireAuth } from '../api/utils/auth';
 import { eq } from 'drizzle-orm';
 
+export const prerender = false;
+
 export const GET: APIRoute = async ({ request }) => {
   const auth = await requireAuth(request);
   if (auth instanceof Response) return auth;

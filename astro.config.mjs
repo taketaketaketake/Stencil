@@ -4,5 +4,10 @@ import { defineConfig } from 'astro/config';
 
 export default defineConfig({
   integrations: [tailwind()],
-  output: 'server'
+  vite: {
+    define: {
+      __DEFINES__: JSON.stringify({}),
+      global: 'globalThis'
+    }
+  }
 });

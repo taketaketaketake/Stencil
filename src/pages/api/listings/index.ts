@@ -1,3 +1,5 @@
+export const prerender = false;
+
 import type { APIContext } from 'astro';
 import { db } from '../../../db/client';
 import { listings, listingVariants } from '../../../db/schema';

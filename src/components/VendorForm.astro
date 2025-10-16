@@ -76,8 +76,7 @@ const { mode = 'register' } = Astro.props;
             : 'Login successful! Redirecting...';
 
         if (VENDOR_MODE === 'login') {
-          const { token } = await res.json();
-          document.cookie = `token=${token}; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=strict`;
+          // Cookie is already set by server as HttpOnly
           window.location.href = '/vendor-portal';
         } else {
           form.reset();

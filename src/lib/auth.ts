@@ -1,7 +1,6 @@
-import { verify } from 'jsonwebtoken';
+import { signToken, verifyToken } from '../utils/jwt';
 import { parse } from 'cookie';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
 
 // Helper to generate a redirect Response
 function redirectToLogin(): Response {
@@ -16,7 +15,7 @@ function redirectToLogin(): Response {
  * @param vendorId - ID of the vendor from the database
  */
 export function generateToken(vendorId: string): string {
-  return require('jsonwebtoken').sign({ vendorId }, JWT_SECRET, { expiresIn: '7d' });
+  return signToken(vendorId);
 }
 
 /**
@@ -32,7 +31,7 @@ export async function requireAuth(Astro: any): Promise<string | Response> {
   }
 
   try {
-    const payload = verify(token, JWT_SECRET) as { vendorId: string };
+    const payload = verifyToken(token);
     return payload.vendorId;
   } catch {
     return redirectToLogin();

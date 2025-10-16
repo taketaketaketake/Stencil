@@ -1,5 +1,26 @@
 ---
 // src/components/Navbar.astro
+// Check authentication server-side
+let isAuthenticated = false;
+try {
+  const { getVendorIdFromToken } = await import('../utils/jwt');
+  const cookieHeader = Astro.request.headers.get('cookie') || '';
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(';').forEach(cookie => {
+    const [name, ...rest] = cookie.trim().split('=');
+    if (name) {
+      cookies[name] = rest.join('=');
+    }
+  });
+  
+  if (cookies.token) {
+    getVendorIdFromToken(cookies.token);
+    isAuthenticated = true;
+  }
+} catch {
+  // Token is invalid or missing
+  isAuthenticated = false;
+}
 ---
 <nav class="bg-brand-bg border-b border-gray-200 p-4 shadow-md">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -10,64 +31,37 @@
         <a href="/sell" class="font-bold hover:text-brand-teal transition-colors">Sell with Us</a>
         <a href="/about" class="font-bold hover:text-brand-teal transition-colors">About Us</a>
         <a href="/contact" class="font-bold hover:text-brand-teal transition-colors">Contact</a>
-        <a href="/vendor-portal" id="vendorPortalLink" class="font-bold hover:text-brand-teal transition-colors hidden">Vendor Portal</a>
-        <a href="/login" id="loginLink" class="font-bold hover:text-brand-teal transition-colors hidden">Login</a>
-        <a href="/register" id="registerLink" class="font-bold hover:text-brand-teal transition-colors hidden">Register</a>
-        <button id="logoutBtn" class="font-bold hover:text-brand-teal transition-colors hidden">Logout</button>
+        
+        {isAuthenticated ? (
+          <>
+            <a href="/vendor-portal" class="font-bold hover:text-brand-teal transition-colors">Vendor Portal</a>
+            <button id="logoutBtn" class="font-bold hover:text-brand-teal transition-colors">Logout</button>
+          </>
+        ) : (
+          <>
+            <a href="/login" class="font-bold hover:text-brand-teal transition-colors">Login</a>
+            <a href="/register" class="font-bold hover:text-brand-teal transition-colors">Register</a>
+          </>
+        )}
       </div>
     </div>
   </nav>
   
-  <script is:inline type="module">
-    // Utility: read cookie value by name
-    function getCookie(name) {
-      return document.cookie.split('; ').reduce((r, v) => {
-        const parts = v.split('=');
-        return parts[0] === name ? decodeURIComponent(parts[1]) : r;
-      }, '');
-    }
-
-    // Check if user is actually logged in by testing the token
-    async function checkAuth() {
-      const token = getCookie('token');
-      if (!token) {
-        return false;
-      }
-
-      try {
-        // Test token by making a request to vendor portal (which requires auth)
-        const response = await fetch('/vendor-portal/profile', {
-          method: 'GET',
-          credentials: 'include'
+  {isAuthenticated && (
+    <script is:inline type="module">
+      // Logout handler
+      document.getElementById('logoutBtn')?.addEventListener('click', () => {
+        // Clear the HttpOnly cookie by making a server request
+        fetch('/api/auth/logout', { 
+          method: 'POST',
+          credentials: 'include' 
+        }).then(() => {
+          window.location.href = '/';
+        }).catch(() => {
+          // Fallback: redirect anyway
+          window.location.href = '/';
         });
-        
-        // If we get 401/403, token is invalid
-        if (response.status === 401 || response.status === 403) {
-          // Clear invalid token
-          document.cookie = 'token=; Path=/; Max-Age=0; SameSite=strict';
-          return false;
-        }
-        
-        return response.ok;
-      } catch {
-        return false;
-      }
-    }
-
-    // Initialize auth state
-    checkAuth().then(isVendor => {
-      // Show/hide links based on authentication
-      document.getElementById('vendorPortalLink').classList.toggle('hidden', !isVendor);
-      document.getElementById('logoutBtn').classList.toggle('hidden', !isVendor);
-      document.getElementById('loginLink').classList.toggle('hidden', isVendor);
-      document.getElementById('registerLink').classList.toggle('hidden', isVendor);
-    });
-  
-    // Logout handler
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      // Clear the cookie
-      document.cookie = 'token=; Path=/; Max-Age=0; SameSite=strict';
-      window.location.href = '/';
-    });
-  </script>
+      });
+    </script>
+  )}
   

@@ -1,9 +1,11 @@
 ---
+export const prerender = false;
+
 import DefaultLayout from '../layouts/DefaultLayout.astro';
 import { requireAuth } from './api/utils/auth';
 import { db } from '../db/client';
-import { listings, sales, payouts, vendors, vendorImages } from '../db/schema';
-import { eq, and } from 'drizzle-orm';
+import { listings, listingVariants, sales, payouts, vendors, vendorImages } from '../db/schema';
+import { eq, and, sql, inArray } from 'drizzle-orm';
 
 // Check for auth token in cookies
 const cookieHeader = Astro.request.headers.get('cookie') || '';
@@ -22,9 +24,8 @@ if (!cookies.token) {
 // Verify token and get vendor
 let vendorId;
 try {
-  const jwt = await import('jsonwebtoken');
-  const payload = jwt.verify(cookies.token, process.env.JWT_SECRET!) as { vendorId: string };
-  vendorId = parseInt(payload.vendorId, 10);
+  const { getVendorIdFromToken } = await import('../utils/jwt');
+  vendorId = getVendorIdFromToken(cookies.token);
 } catch {
   return Astro.redirect('/login');
 }
@@ -36,8 +37,25 @@ const storeImages = await db
   .from(vendorImages)
   .where(and(eq(vendorImages.vendorId, vendorId), eq(vendorImages.type, 'store')));
 
-// Load stats
-const inventory = await db.select().from(listings).where(eq(listings.vendorId, vendorId));
+// Load stats - get listings first, then variants separately (like edit-listing does)
+const listingsData = await db.select().from(listings).where(eq(listings.vendorId, vendorId));
+const listingIds = listingsData.map(l => l.id);
+
+// Get all variants for these listings
+const allVariants = listingIds.length > 0 
+  ? await db.select().from(listingVariants).where(inArray(listingVariants.listingId, listingIds))
+  : [];
+
+// Create inventory with first variant data
+const inventory = listingsData.map(listing => {
+  const firstVariant = allVariants.find(v => v.listingId === listing.id);
+  return {
+    ...listing,
+    firstVariantPrice: firstVariant?.price || 0,
+    firstVariantImages: firstVariant?.images || null,
+    firstVariantStock: firstVariant?.stock || 0
+  };
+});
 const soldItems = await db.select().from(sales).where(eq(sales.vendorId, vendorId));
 const totalRevenue = soldItems.reduce((sum, s) => sum + s.amount, 0);
 const pendingPayouts = await db
@@ -159,24 +177,48 @@ const pendingPayouts = await db
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Inventory</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          {inventory.map((item) => (
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap">{item.name}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{item.category || 'Uncategorized'}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{item.status}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                <a href={`/edit-listing/${item.id}`} class="text-blue-600 hover:underline">Edit</a>
-                <button data-listing-id={item.id} class="text-red-600 hover:underline delete-btn">Remove</button>
-              </td>
-            </tr>
-          ))}
+          {inventory.map((item) => {
+            let images = [];
+            try {
+              images = item.firstVariantImages ? JSON.parse(item.firstVariantImages) : [];
+            } catch (e) {
+              console.error('JSON parse error for images:', e);
+            }
+            const imageUrl = images.length > 0 ? images[0] : null;
+            const price = item.firstVariantPrice || 0;
+            const stock = item.firstVariantStock || 0;
+            
+            return (
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {imageUrl ? (
+                    <img src={imageUrl} alt={item.name} class="w-8 h-8 object-cover rounded" />
+                  ) : (
+                    <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                      No img
+                    </div>
+                  )}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">{item.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{item.category || 'Uncategorized'}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${price.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{stock}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                  <a href={`/edit-listing/${item.id}`} class="text-blue-600 hover:underline">Edit</a>
+                  <button data-listing-id={item.id} class="text-red-600 hover:underline delete-btn">Remove</button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

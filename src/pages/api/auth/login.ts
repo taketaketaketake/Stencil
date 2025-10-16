@@ -1,28 +1,28 @@
 import type { APIRoute } from "astro";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { signToken } from "../../../utils/jwt";
 import { eq } from "drizzle-orm";
 import { db } from "../../../db/client";
 import { vendors } from "../../../db/schema";
 import "dotenv/config"; // ensures .env is loaded in dev or production
 
+export const prerender = false;
+
 export const POST: APIRoute = async ({ request }) => {
   try {
-    // Load and validate JWT secret
-    const JWT_SECRET = process.env.JWT_SECRET;
-    if (!JWT_SECRET) {
-      console.error("❌ Missing JWT_SECRET in .env");
-      return new Response(
-        JSON.stringify({ error: "Server misconfiguration: missing JWT_SECRET" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
     // Parse request body
-    const { email, password } = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      console.error("JSON parsing error:", jsonError);
+      return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    
+    const { email, password } = body;
     if (!email || !password) {
       return new Response(JSON.stringify({ error: "Email and password required" }), {
         status: 400,
@@ -54,14 +54,15 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ vendorId: user.id.toString() }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = signToken(user.id.toString());
 
-    // Respond with token
+    // Set token as httpOnly cookie and also return in response
     return new Response(JSON.stringify({ token }), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax`
+      },
     });
   } catch (err) {
     console.error("Login error:", err);

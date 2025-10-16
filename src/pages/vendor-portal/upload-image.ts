@@ -1,3 +1,5 @@
+export const prerender = false;
+
 import type { APIRoute } from 'astro';
 import { requireAuth } from '../api/utils/auth';
 import crypto from 'crypto';
