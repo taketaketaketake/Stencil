@@ -35,7 +35,7 @@ const totalPages = Math.ceil(allProducts.length / productsPerPage);
     <h1 class="text-4xl font-extrabold font-heading text-brand-text mb-8">Shop All Products</h1>
     <FilterSidebar />
     <div class="mt-8">
-      <div id="product-grid-container" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div id="product-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
         {initialProducts.map(product => (
           <ProductCard product={product} />
         ))}
