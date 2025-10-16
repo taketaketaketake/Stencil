@@ -3,6 +3,7 @@ import DefaultLayout from '../layouts/DefaultLayout.astro';
 import { requireAuth } from '../lib/auth';
 import { db } from '../db/client';
 import { listings, sales, payouts } from '../db/schema';
+import { eq, and } from 'drizzle-orm';
 
 // Authenticate vendor and get their ID
 const auth = await requireAuth(Astro);
@@ -10,10 +11,13 @@ if (auth instanceof Response) return auth;
 const vendorId = auth;
 
 // Load data at build time
-const inventory = await db.select().from(listings).where(listings.vendorId.eq(vendorId));
-const soldItems = await db.select().from(sales).where(sales.vendorId.eq(vendorId));
+const inventory = await db.select().from(listings).where(eq(listings.vendorId, vendorId));
+const soldItems = await db.select().from(sales).where(eq(sales.vendorId, vendorId));
 const totalRevenue = soldItems.reduce((sum, s) => sum + s.amount, 0);
-const pendingPayouts = await db.select().from(payouts).where(payouts.vendorId.eq(vendorId)).where(payouts.status.eq('pending'));
+const pendingPayouts = await db
+  .select()
+  .from(payouts)
+  .where(and(eq(payouts.vendorId, vendorId), eq(payouts.status, 'pending')));
 ---
 <DefaultLayout title="Vendor Dashboard - Stencil">
   <!-- Stats Cards -->

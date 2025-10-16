@@ -15,11 +15,14 @@
         "better-sqlite3": "^9.6.0",
         "cloudinary": "^1.41.3",
         "cookie": "^0.5.0",
+        "dotenv": "^17.2.3",
         "drizzle-orm": "^0.30.0",
         "fuse.js": "^6.6.2",
+        "jq": "^1.7.2",
         "jsonwebtoken": "^9.0.0",
         "resend": "^4.4.0",
-        "stripe": "^12.10.0"
+        "stripe": "^12.10.0",
+        "zod": "^3.25.76"
     },
     "devDependencies": {
         "@astrojs/tailwind": "^6.0.2",
