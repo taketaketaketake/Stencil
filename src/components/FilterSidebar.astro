@@ -1,38 +1,29 @@
 ---
 // src/components/FilterSidebar.astro
 ---
-<aside class="w-full p-6 bg-white rounded-lg shadow-md mb-8 lg:flex lg:flex-wrap lg:justify-between lg:items-center lg:gap-4">
-  <h3 class="text-xl font-semibold mb-6 text-brand-text lg:mb-0">Filter Products</h3>
+<aside class="w-full p-6 bg-white rounded-lg shadow-md mb-8 flex flex-col lg:flex-row lg:flex-wrap lg:justify-between lg:items-start lg:gap-6">
+  <h3 class="text-2xl font-bold mb-6 text-brand-text lg:mb-0 lg:w-full">Filter Products</h3>
   
-  <div class="mb-8 lg:mb-0 lg:flex-grow">
-    <h4 class="text-lg font-medium mb-3 text-brand-text">Categories</h4>
-    <div class="flex flex-wrap gap-2">
-      <li><label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-magenta rounded" /> <span class="ml-2 text-brand-text">Apparel</span></label></li>
-      <li><label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-orange rounded" /> <span class="ml-2 text-brand-text">Accessories</span></label></li>
-      <li><label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-teal rounded" /> <span class="ml-2 text-brand-text">Home Goods</span></label></li>
-      <li><label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-magenta rounded" /> <span class="ml-2 text-brand-text">Art & Prints</span></label></li>
+  <div class="mb-8 w-full lg:mb-0 lg:flex-1 min-w-[200px]">
+    <h4 class="text-lg font-semibold mb-3 text-brand-text">Categories</h4>
+    <div class="flex flex-wrap gap-x-4 gap-y-2">
+      <label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-magenta rounded" /> <span class="ml-2 text-brand-text">Apparel</span></label>
+      <label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-orange rounded" /> <span class="ml-2 text-brand-text">Accessories</span></label>
+      <label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-teal rounded" /> <span class="ml-2 text-brand-text">Home Goods</span></label>
+      <label class="flex items-center"><input type="checkbox" class="form-checkbox text-brand-magenta rounded" /> <span class="ml-2 text-brand-text">Art & Prints</span></label>
     </div>
   </div>
 
-  <div class="mb-8 lg:mb-0 lg:flex-grow">
-    <h4 class="text-lg font-medium mb-3 text-brand-text">Price Range</h4>
-    <input type="range" min="0" max="1000" value="500" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-orange" />
-    <div class="flex justify-between text-sm text-brand-text mt-2">
-      <span>$0</span>
-      <span>$1000+</span>
-    </div>
-  </div>
-
-  <div class="mb-8 lg:mb-0 lg:flex-grow">
-    <h4 class="text-lg font-medium mb-3 text-brand-text">Other Filters</h4>
-    <select class="w-full p-2 border rounded text-brand-text bg-white">
+  <div class="mb-8 w-full lg:mb-0 lg:flex-1 min-w-[200px]">
+    <h4 class="text-lg font-semibold mb-3 text-brand-text">Other Filters</h4>
+    <select class="w-full p-2 border border-gray-300 rounded-md text-brand-text bg-white focus:ring-brand-orange focus:border-brand-orange">
       <option>Option 1</option>
       <option>Option 2</option>
       <option>Option 3</option>
     </select>
   </div>
 
-  <button class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 lg:w-auto lg:px-8">
+  <button class="w-full py-3 bg-brand-primary text-white font-semibold rounded-md hover:bg-brand-secondary transition-colors duration-200 lg:w-auto lg:px-8">
     Apply Filters
   </button>
 </aside>

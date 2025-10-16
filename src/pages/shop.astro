@@ -90,7 +90,7 @@ const totalPages = Math.ceil(allProducts.length / productsPerPage);
           <a href="/product/${product.id}" class="block">
             <h3 class="text-lg font-bold font-heading">${product.name}</h3>
           </a>
-          <p class="text-sm text-gray-600 mb-2">by <a href="/vendor-portal?name=${product.vendor}" class="hover:underline text-brand-text font-semibold">${product.vendor}</a></p>
+          <p class="text-sm text-gray-600 mb-2">by <a href="/seller/${product.vendor}" class="hover:underline text-brand-text font-semibold">${product.vendor}</a></p>
           <p class="text-xl font-extrabold text-brand-text">$${product.price.toFixed(2)}</p>
         </div>
       </div>

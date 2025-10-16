@@ -2,20 +2,29 @@
 import DefaultLayout from '../layouts/DefaultLayout.astro';
 import SellSteps from '../components/SellSteps.astro';
 import SellHero from '../components/SellHero.astro';
-import SectionHeading from '../components/SectionHeading.astro';
+import WhySellOnStencilSection from '../components/WhySellOnStencilSection.astro';
+import SellerBenefitsGrid from '../components/SellerBenefitsGrid.astro';
 import TestimonialSection from '../components/TestimonialSection.astro';
 import VendorFAQ from '../components/VendorFAQ.astro';
+import ContactSellerSupport from '../components/ContactSellerSupport.astro';
+import SectionHeading from '../components/SectionHeading.astro';
 import VendorForm from '../components/VendorForm.astro';
 ---
 
 <DefaultLayout title="Sell with Us - Stencil" description="Join our marketplace and sell your unique products.">
   <SellHero />
 
+  <WhySellOnStencilSection />
+
   <SellSteps />
+
+  <SellerBenefitsGrid />
 
   <TestimonialSection />
 
   <VendorFAQ />
+
+  <ContactSellerSupport />
 
   <section id="register-form" class="py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,8 +1,8 @@
 ---
 import DefaultLayout from '../layouts/DefaultLayout.astro';
 import { requireAuth } from '../lib/auth';
----
-<!-- Authenticate vendor -->
+
+// Authenticate vendor
 const vendorId = await requireAuth(Astro);
 ---
 <DefaultLayout title="Add New Listing - Stencil">
