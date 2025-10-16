@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /vendor-portal
+Disallow: /api/
+Disallow: /checkout
+Disallow: /login
+Disallow: /register
+Disallow: /edit-listing
+Disallow: /add-listing
+
+Sitemap: https://shopstencil.com/sitemap-index.xml

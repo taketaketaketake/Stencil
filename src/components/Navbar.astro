@@ -24,8 +24,17 @@ try {
 ---
 <nav class="bg-brand-bg border-b border-gray-200 p-4 shadow-md">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="/" class="text-2xl font-extrabold font-heading text-brand-magenta">Vibe</a>
-      <div class="flex items-center space-x-6">
+      <a href="/" class="text-2xl font-extrabold font-heading text-brand-magenta">Stencil</a>
+      
+      <!-- Mobile menu button -->
+      <button id="mobileMenuBtn" class="md:hidden flex flex-col space-y-1 focus:outline-none">
+        <span class="w-6 h-0.5 bg-gray-800 block transition-all duration-300"></span>
+        <span class="w-6 h-0.5 bg-gray-800 block transition-all duration-300"></span>
+        <span class="w-6 h-0.5 bg-gray-800 block transition-all duration-300"></span>
+      </button>
+
+      <!-- Desktop menu -->
+      <div class="hidden md:flex items-center space-x-6">
         <a href="/" class="font-bold hover:text-brand-teal transition-colors">Home</a>
         <a href="/shop" class="font-bold hover:text-brand-teal transition-colors">Shop</a>
         <a href="/sell" class="font-bold hover:text-brand-teal transition-colors">Sell with Us</a>
@@ -45,23 +54,67 @@ try {
         )}
       </div>
     </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden mt-4 pb-4 border-t border-gray-200">
+      <div class="flex flex-col space-y-3 pt-4">
+        <a href="/" class="font-bold hover:text-brand-teal transition-colors">Home</a>
+        <a href="/shop" class="font-bold hover:text-brand-teal transition-colors">Shop</a>
+        <a href="/sell" class="font-bold hover:text-brand-teal transition-colors">Sell with Us</a>
+        <a href="/about" class="font-bold hover:text-brand-teal transition-colors">About Us</a>
+        <a href="/contact" class="font-bold hover:text-brand-teal transition-colors">Contact</a>
+        
+        {isAuthenticated ? (
+          <>
+            <a href="/vendor-portal" class="font-bold hover:text-brand-teal transition-colors">Vendor Portal</a>
+            <button id="logoutBtnMobile" class="font-bold hover:text-brand-teal transition-colors text-left">Logout</button>
+          </>
+        ) : (
+          <>
+            <a href="/login" class="font-bold hover:text-brand-teal transition-colors">Login</a>
+            <a href="/register" class="font-bold hover:text-brand-teal transition-colors">Register</a>
+          </>
+        )}
+      </div>
+    </div>
   </nav>
   
-  {isAuthenticated && (
-    <script is:inline type="module">
-      // Logout handler
-      document.getElementById('logoutBtn')?.addEventListener('click', () => {
-        // Clear the HttpOnly cookie by making a server request
-        fetch('/api/auth/logout', { 
-          method: 'POST',
-          credentials: 'include' 
-        }).then(() => {
-          window.location.href = '/';
-        }).catch(() => {
-          // Fallback: redirect anyway
-          window.location.href = '/';
-        });
+  <script is:inline type="module">
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuBars = mobileMenuBtn?.querySelectorAll('span');
+    
+    mobileMenuBtn?.addEventListener('click', () => {
+      mobileMenu?.classList.toggle('hidden');
+      
+      // Animate hamburger bars
+      if (mobileMenu?.classList.contains('hidden')) {
+        // Reset to hamburger
+        menuBars?.[0]?.style.setProperty('transform', 'rotate(0deg) translate(0, 0)');
+        menuBars?.[1]?.style.setProperty('opacity', '1');
+        menuBars?.[2]?.style.setProperty('transform', 'rotate(0deg) translate(0, 0)');
+      } else {
+        // Transform to X
+        menuBars?.[0]?.style.setProperty('transform', 'rotate(45deg) translate(4px, 4px)');
+        menuBars?.[1]?.style.setProperty('opacity', '0');
+        menuBars?.[2]?.style.setProperty('transform', 'rotate(-45deg) translate(4px, -4px)');
+      }
+    });
+
+    // Logout handlers
+    function handleLogout() {
+      fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include' 
+      }).then(() => {
+        window.location.href = '/';
+      }).catch(() => {
+        window.location.href = '/';
       });
-    </script>
-  )}
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
+    document.getElementById('logoutBtnMobile')?.addEventListener('click', handleLogout);
+  </script>
   

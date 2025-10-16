@@ -3,7 +3,11 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { join } from 'path';
 
-const sqlite = new Database('db.sqlite');
+// Use persistent SQLite database for Fly.io deployment
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/data/db.sqlite'  // Fly.io mounted volume
+  : 'db.sqlite';       // Local development
+const sqlite = new Database(dbPath);
 export const db = drizzle(sqlite);
 
 // Create indexes for performance optimization
