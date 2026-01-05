@@ -8,6 +8,13 @@ const allowedOrigins = [
   'https://www.shopstencil.com'
 ];
 
+// CORS headers configuration
+const CORS_HEADERS = {
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true'
+} as const;
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const origin = context.request.headers.get('origin');
   
@@ -19,9 +26,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         status: 204,
         headers: {
           'Access-Control-Allow-Origin': origin,
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Credentials': 'true',
+          ...CORS_HEADERS,
           'Access-Control-Max-Age': '86400',
         }
       });
@@ -36,9 +41,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Add CORS headers if origin is allowed
   if (origin && allowedOrigins.includes(origin)) {
     response.headers.set('Access-Control-Allow-Origin', origin);
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    Object.entries(CORS_HEADERS).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
   }
   
   return response;
