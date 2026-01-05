@@ -11,3 +11,6 @@ db.sqlite
 
 # Local Netlify folder
 .netlify
+
+# OS files
+.DS_Store

@@ -10,18 +10,6 @@ export default defineConfig({
     define: {
       __DEFINES__: JSON.stringify({}),
       global: 'globalThis'
-    },
-    server: {
-      // Configure CORS for development
-      cors: {
-        origin: [
-          'http://localhost:3000',
-          'http://localhost:4321', 
-          'https://shopstencil.com',
-          'https://www.shopstencil.com'
-        ],
-        credentials: true
-      }
     }
   }
 });
