@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for stencil on 2025-10-16T16:18:17-04:00
+# fly.toml app configuration file for Stencil API
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'stencil'
+app = 'stencil-api'
 primary_region = 'ord'
 
 [build]
