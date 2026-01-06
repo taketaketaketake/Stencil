@@ -3,7 +3,7 @@
 #  Marketplace API Full Integration Test (Safe + Confirmed)
 # =========================================================
 
-BASE_URL="http://localhost:4321/api"  # change to staging if needed
+BASE_URL="http://localhost:8080/api"  # Updated for Fastify migration
 EMAIL="vendor@example.com"
 PASSWORD="password"
 
